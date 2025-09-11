@@ -92,7 +92,7 @@ casPorcentaje (Casillero _ _ _ p) = p
 
 -- | Dado un histograma, devuelve la lista de casilleros con sus límites, cantidad y porcentaje.
 casilleros :: Histograma -> [Casillero]
-casilleros (Histograma i t l) = zipWith4 (\min max cant porc -> Casillero min max cant porc) (listaMin i t (length l)) (listaMax i t (length l)) l (porcentajes i t l)
+casilleros (Histograma i t l) = zipWith4 (\min max cant porc -> Casillero min max cant porc) (listaMin i t (length l)) (listaMax i t (length l)) l (porcentajes1 i t l)
 
 listaMin :: Float -> Float -> Int -> [Float]
 listaMin inicio tam cantCasilleros = infinitoNegativo : [ inicio + (fromIntegral n*tam) | n <- [0..cantCasilleros - 2]]
@@ -101,9 +101,12 @@ listaMax :: Float -> Float -> Int -> [Float]
 listaMax inicio tam cantCasilleros = [ inicio + (fromIntegral n*tam) | n <- [0..cantCasilleros - 2]] ++ [infinitoPositivo]
 
 
-porcentajes :: Float->Float->[Int]->[Float]
-porcentajes inicio tamCasillero lista= foldr(\x y -> x/sum fromIntegral lista) [] fromIntegral lista
---a -> b ->b
--- sum l nos va a devolver la suma de todos los elementos por la que vamos a tener que dividir a cada casilla
--- para calcular cada casilla voy a necesitar conseguir el valor dentro de su respectivo indice.  y dividirlo por sum l
--- seria algo del estilo actualizarElem identidad lista lista.  De esa manera no actualiza nada y me devuelve el valor
+-- porcentajes :: Float->Float->[Int]->[Float]
+-- porcentajes inicio tamCasillero lista= foldr(\x y -> x/sum fromIntegral lista) 0 fromIntegral lista
+
+porcentajes1 :: Float->Float->[Int]->[Float]
+porcentajes1 inicio tamCasillero lista= map (\x -> calcPorcentaje (fromIntegral x) (fromIntegral (length lista)))  lista  
+
+calcPorcentaje :: Float -> Float ->Float
+calcPorcentaje num length = num / length*100
+
