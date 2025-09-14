@@ -22,15 +22,50 @@ data Expr
   | Div Expr Expr
   deriving (Show, Eq)
 
--- recrExpr :: ... anotar el tipo ...
-recrExpr = error "COMPLETAR EJERCICIO 7"
 
--- foldExpr :: ... anotar el tipo ...
-foldExpr = error "COMPLETAR EJERCICIO 7"
+-- 7 ---------------------------------------------------------------
+
+type ConstructorRecu a = (Expr -> a -> Expr -> a-> a)
+
+recrExpr :: (Float -> a) -> (Float -> Float -> a) -> ConstructorRecu a -> ConstructorRecu a -> ConstructorRecu a-> ConstructorRecu a -> Expr -> a
+recrExpr fConst fRango fSuma fResta fMult fDiv c = case c of
+                                                      Const b-> fConst b
+                                                      Rango a b -> fRango a b
+                                                      Suma a b -> fSuma a (rec a) b (rec b)
+                                                      Resta a b -> fResta a (rec a) b (rec b)
+                                                      Mult a  b -> fMult a (rec a) b (rec b)
+                                                      Div a b -> fDiv a (rec a) b (rec b)
+                                                  where
+                                                      rec = recrExpr fConst fRango fSuma fResta fMult fDiv
+
+type FuncionRecursiva a = (a -> a -> a)
+
+foldExpr :: (Float -> a) -> (Float -> Float -> a) -> FuncionRecursiva a -> FuncionRecursiva a -> FuncionRecursiva a -> FuncionRecursiva a -> Expr -> a
+foldExpr fConst fRango fSuma fResta fMult fDiv c = case c of
+                                                      Const b-> fConst b
+                                                      Rango a b -> fRango a b
+                                                      Suma a b -> fSuma (rec a) (rec b)
+                                                      Resta a b -> fResta (rec a) (rec b)
+                                                      Mult a  b -> fMult (rec a) (rec b)
+                                                      Div a b -> fDiv (rec a) (rec b)
+                                                  where
+                                                      rec = foldExpr fConst fRango fSuma fResta fMult fDiv
+
+-- 8 ---------------------------------------------------------------
 
 -- | Evaluar expresiones dado un generador de números aleatorios
-eval :: Expr -> G Float
-eval = error "COMPLETAR EJERCICIO 8"
+--eval :: Expr -> G Float
+--eval (Const a ) = G a 
+
+-- testsEval :: Test
+-- testsEval =
+--   test
+--     [ fst (eval (Suma (Rango 1 5) (Const 1)) genFijo) ~?= 4.0,
+--       fst (eval (Suma (Rango 1 5) (Const 1)) (genNormalConSemilla 0)) ~?= 3.7980492,
+--       -- el primer rango evalua a 2.7980492 y el segundo a 3.1250308
+--       fst (eval (Suma (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 5.92308,
+--       completar
+--     ]
 
 -- | @armarHistograma m n f g@ arma un histograma con @m@ casilleros
 -- a partir del resultado de tomar @n@ muestras de @f@ usando el generador @g@.
