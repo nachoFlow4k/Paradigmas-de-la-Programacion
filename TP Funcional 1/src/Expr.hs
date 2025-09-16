@@ -78,13 +78,13 @@ foldExpr fConst fRango fSuma fResta fMult fDiv c = case c of
 eval :: Expr -> G Float
 eval = foldExpr (\x g -> (x, g))
                 (\x y g -> dameUno (x,y) g)
-                (\x y g -> operacion (+) x y g)
-                (\x y g -> operacion (-) x y g)
-                (\x y g -> operacion (*) x y g)
-                (\x y g -> operacion (/) x y g)
+                (\x y g -> evaluar (+) x y g)
+                (\x y g -> evaluar (-) x y g)
+                (\x y g -> evaluar (*) x y g)
+                (\x y g -> evaluar (/) x y g)
 
-operacion :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> (Float, Gen)
-operacion f x y g = (fst (x g) + fst (y (snd (x g))), g)
+evaluar :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> (Float, Gen)
+evaluar f x y g = (f (fst (x g)) (fst (y (snd (x g)))), g)
 
 -- operacion :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> G Float
 -- operacion f x y g = (f ((fst (x g)) (fst (y (snd (x g))))), g)
