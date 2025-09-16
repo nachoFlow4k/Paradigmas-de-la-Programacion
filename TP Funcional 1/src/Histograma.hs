@@ -107,6 +107,6 @@ listaMax inicio tam cantCasilleros = [ inicio + (fromIntegral n*tam) | n <- [0..
 porcentajes1 :: Float->Float->[Int]->[Float]
 porcentajes1 inicio tamCasillero lista= map (\x -> calcPorcentaje (fromIntegral x) (fromIntegral (length lista)))  lista  
 
-calcPorcentaje :: Float -> Float ->Float
-calcPorcentaje num length = num / length*100
+calcPorcentaje :: Float -> [Int] -> Float
+calcPorcentaje num l = if sum l == 0 then 0 else num / fromIntegral(sum l) * 100
 
