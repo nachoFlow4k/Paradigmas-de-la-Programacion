@@ -118,8 +118,7 @@ evalHistograma m n expr = armarHistograma m n (eval expr)
 -- En definitiva queremos pasar la Expresion dada a lenguaje normal que podamos entender, como dice la funcion.
 -- Primero llamo a recrExpr para obtener la expresion a mostrar, luego
 -- definimos con notaciones lambda los posibles casos de expresion (suma, resta, cte. , etc), maybeParen esta
--- para evitar los parentesis de mas, se fija si en la expresion hay una division o multiplicacion y aplica
--- parentesis en caso de haber.
+-- para evitar los parentesis de mas.
 -- 
 mostrar :: Expr -> String
 mostrar = recrExpr show (\x y -> show x ++ "~" ++ show y)
