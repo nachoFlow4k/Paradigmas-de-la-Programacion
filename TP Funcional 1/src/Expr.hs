@@ -51,26 +51,49 @@ foldExpr fConst fRango fSuma fResta fMult fDiv c = case c of
                                                   where
                                                       rec = foldExpr fConst fRango fSuma fResta fMult fDiv
 
+
+
 -- 8 ---------------------------------------------------------------
 
 -- | Evaluar expresiones dado un generador de números aleatorios
---eval :: Expr -> G Float
---eval (Const a ) = G a 
+eval :: Expr -> G Float
+eval = foldExpr (\x g -> (x, g))
+                (\x y g -> dameUno (x,y) g)
+                (\x y g -> (fst (x g) + fst (y (snd (x g))), g))
+                (\x y g -> (fst (x g) - fst (y (snd (x g))), g))
+                (\x y g -> (fst (x g) * fst (y (snd (x g))), g))
+                (\x y g -> (fst (x g) / fst (y (snd (x g))), g))
 
--- testsEval :: Test
--- testsEval =
---   test
---     [ fst (eval (Suma (Rango 1 5) (Const 1)) genFijo) ~?= 4.0,
---       fst (eval (Suma (Rango 1 5) (Const 1)) (genNormalConSemilla 0)) ~?= 3.7980492,
---       -- el primer rango evalua a 2.7980492 y el segundo a 3.1250308
---       fst (eval (Suma (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 5.92308,
---       completar
---     ]
+-- operacion :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> G Float
+-- operacion f x y g = (f ((fst (x g)) (fst (y (snd (x g))))), g)
+
+  --    where operacion f x y g = (\f x y g -> (fst (x g) f fst (y (snd (x g))), g))
+
+-- 
+-- muestra :: G a -> Int -> G [a]
+-- rango95 :: [Float] -> (Float, Float)
 
 -- | @armarHistograma m n f g@ arma un histograma con @m@ casilleros
 -- a partir del resultado de tomar @n@ muestras de @f@ usando el generador @g@.
+
+-- | Arma un histograma a partir de una lista de números reales con la cantidad de casilleros y rango indicados.
+-- histograma :: Int      -> (Float, Float)     -> [Float]     -> Histograma
+--        cant casilleros -> rango (intervalos) -> lista elems
+
+-- HISTOGRAMA  :: Int -> Float     -> [Int]
+--             inicio -> intervalo -> lista elemsxintervalo
+
+--armarHistograma :: Int     -> Int          -> G Float     -> G Histograma
+--                casilleros -> cant muestra -> (Float,Gen) -> 
+
+--armarHistograma :: Int -> Int -> Gen -> (Float, Gen) -> Gen -> (Histograma, Gen)
 armarHistograma :: Int -> Int -> G Float -> G Histograma
-armarHistograma m n f g = error "COMPLETAR EJERCICIO 9"
+armarHistograma m n f g = ((histograma m (rango95 (fst (tomarMuestra(muestra f n )))) (fst ((muestra f n)))), g)
+
+tomarMuestra :: Gen -> ([Float], Gen) -> ([Float], Gen)
+tomarMuestra _ f = f
+
+-- Gen -> (Float, Gen)
 
 -- | @evalHistograma m n e g@ evalúa la expresión @e@ usando el generador @g@ @n@ veces
 -- devuelve un histograma con @m@ casilleros y rango calculado con @rango95@ para abarcar el 95% de confianza de los valores.
