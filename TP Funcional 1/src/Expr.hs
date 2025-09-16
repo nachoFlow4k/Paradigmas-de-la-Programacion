@@ -86,56 +86,47 @@ eval = foldExpr (\x g -> (x, g))
 evaluar :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> (Float, Gen)
 evaluar f x y g = (f (fst (x g)) (fst (y (snd (x g)))), g)
 
--- operacion :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> G Float
--- operacion f x y g = (f ((fst (x g)) (fst (y (snd (x g))))), g)
 
-  --    where operacion f x y g = (\f x y g -> (fst (x g) f fst (y (snd (x g))), g))
 
--- 
--- muestra :: G a -> Int -> G [a]
--- rango95 :: [Float] -> (Float, Float)
+-- 9 ---------------------------------------------------------------
 
--- | @armarHistograma m n f g@ arma un histograma con @m@ casilleros
--- a partir del resultado de tomar @n@ muestras de @f@ usando el generador @g@.
+-- | recibo m=cantidad de casilleros, n=cantidad de muestras de f, g=generador usado en f.
+-- La funcion me va a devolver un Generador de Histograma, en la primera componente de la tupla va a tener el histograma
+-- con los m casilleros, el rango, y la lista; para el rango llamo a rango9, la lista que se va a pasar como parametro la obtengo quedandome
+-- con la primera componente de la tuple devuelta por la funcion muestra, este toma la funcion, el n y el generador, le aplico la funcion n veces a g
+-- eso me da un generador con una lista, de ahi solo me quedo con la primer componente, esa
+-- lista es la que utiliza rango 95 para armar su tupla, y esta es la que necesita el histograma como rango,
+-- y nuevamente genero la lista de numeros que tenia antes con muestra quedandome con la primer componente de la tupla para terminar de pasarle los
+-- parametros a histograma.
+-- Finalmente, me quedo con la segunda componente de esta tupla del generador obtenido con muestra.
 
--- | Arma un histograma a partir de una lista de números reales con la cantidad de casilleros y rango indicados.
--- histograma :: Int      -> (Float, Float)     -> [Float]     -> Histograma
---        cant casilleros -> rango (intervalos) -> lista elems
-
--- HISTOGRAMA  :: Int -> Float     -> [Int]
---             inicio -> intervalo -> lista elemsxintervalo
-
---armarHistograma :: Int     -> Int          -> G Float     -> G Histograma
---                casilleros -> cant muestra -> (Float,Gen) -> 
-
---armarHistograma :: Int -> Int -> Gen -> (Float, Gen) -> Gen -> (Histograma, Gen)
 armarHistograma :: Int -> Int -> G Float -> G Histograma
 armarHistograma m n f g = (histograma m (rango95 (fst (muestra f n g  ))) (fst (muestra f n g)), snd (muestra f n g))
+--                    
+-- 10 ---------------------------------------------------------------
 
--- Gen -> (Float, Gen)
 
--- | @evalHistograma m n e g@ evalúa la expresión @e@ usando el generador @g@ @n@ veces
--- devuelve un histograma con @m@ casilleros y rango calculado con @rango95@ para abarcar el 95% de confianza de los valores.
--- @n@ debe ser mayor que 0.
+-- | llamo a la funcion armarHistograma con m=cantidad de casilleros, n= la cantidad de veces que quiero evaluar y expr=la expresion a evaluar.
+-- utilizo la funcion armarHistograma pasandole los casilleros, el n, y de funcion, el resultado de aplicarle eval a la expresion, que va a devolver
+-- un generador en forma de tupla dependendo de como se evalue esa expresion. O sea me armo un histograma a partir de la evaluacion de la expresion
+
 evalHistograma :: Int -> Int -> Expr -> G Histograma
 evalHistograma m n expr = armarHistograma m n (eval expr)
 
--- Podemos armar histogramas que muestren las n evaluaciones en m casilleros.
--- >>> evalHistograma 11 10 (Suma (Rango 1 5) (Rango 100 105)) (genNormalConSemilla 0)
--- (Histograma 102.005486 0.6733038 [1,0,0,0,1,3,1,2,0,0,1,1,0],<Gen>)
+-- 11 ---------------------------------------------------------------
 
--- >>> evalHistograma 11 10000 (Suma (Rango 1 5) (Rango 100 105)) (genNormalConSemilla 0)
--- (Histograma 102.273895 0.5878462 [239,288,522,810,1110,1389,1394,1295,1076,793,520,310,254],<Gen>)
-
--- | Mostrar las expresiones, pero evitando algunos paréntesis innecesarios.
--- En particular queremos evitar paréntesis en sumas y productos anidados.
+-- En definitiva queremos pasar la Expresion dada a lenguaje normal que podamos entender, como dice la funcion.
+-- Primero llamo a recrExpr para obtener la expresion a mostrar, luego
+-- definimos con notaciones lambda los posibles casos de expresion (suma, resta, cte. , etc), maybeParen esta
+-- para evitar los parentesis de mas, se fija si en la expresion hay una division o multiplicacion y aplica
+-- parentesis en caso de haber.
+-- 
 mostrar :: Expr -> String
 mostrar = recrExpr show (\x y -> show x ++ "~" ++ show y)
-                        (\x rx y ry -> muestra x rx y ry (\expr -> elem (constructor expr) [CEMult, CEResta, CEDiv]) " + ")
-                        (\x rx y ry -> muestra x rx y ry (\z -> constructor z /= CEConst) " - ")
-                        (\x rx y ry -> muestra x rx y ry (\z -> elem (constructor z) [CESuma, CEResta, CEDiv]) " * ")
-                        (\x rx y ry -> muestra x rx y ry (\z -> constructor z /= CEConst) " / ")
-                      where muestra x rx y ry p s = maybeParen (p x) rx ++ s ++ maybeParen (p y) ry
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CERango && constructor x /= CESuma && constructor x /= CEConst) (recx) ++ " + "++maybeParen (constructor y /= CERango && constructor y /= CESuma && constructor y /= CEConst) (recy))
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " - "++maybeParen (constructor y /= CEConst) (recy))
+                        (\x recx y recy -> maybeParen (constructor x /= CERango && constructor x /= CEMult && constructor x /= CEConst) recx ++ " * " ++ maybeParen (constructor y /= CERango && constructor y /= CEMult && constructor y /= CEConst) recy)
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " / "++maybeParen (constructor y /= CEConst) (recy))
 
 data ConstructorExpr = CEConst | CERango | CESuma | CEResta | CEMult | CEDiv
   deriving (Show, Eq)
