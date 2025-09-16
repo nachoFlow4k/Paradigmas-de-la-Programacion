@@ -107,10 +107,7 @@ eval = foldExpr (\x g -> (x, g))
 
 --armarHistograma :: Int -> Int -> Gen -> (Float, Gen) -> Gen -> (Histograma, Gen)
 armarHistograma :: Int -> Int -> G Float -> G Histograma
-armarHistograma m n f g = ((histograma m (rango95 (fst (tomarMuestra(muestra f n )))) (fst ((muestra f n)))), g)
-
-tomarMuestra :: Gen -> ([Float], Gen) -> ([Float], Gen)
-tomarMuestra _ f = f
+armarHistograma m n f g = (histograma m (rango95 (fst (muestra f n g  ))) (fst (muestra f n g)), snd (muestra f n g))
 
 -- Gen -> (Float, Gen)
 
@@ -118,7 +115,7 @@ tomarMuestra _ f = f
 -- devuelve un histograma con @m@ casilleros y rango calculado con @rango95@ para abarcar el 95% de confianza de los valores.
 -- @n@ debe ser mayor que 0.
 evalHistograma :: Int -> Int -> Expr -> G Histograma
-evalHistograma m n expr = error "COMPLETAR EJERCICIO 10"
+evalHistograma m n expr = armarHistograma m n (eval expr)
 
 -- Podemos armar histogramas que muestren las n evaluaciones en m casilleros.
 -- >>> evalHistograma 11 10 (Suma (Rango 1 5) (Rango 100 105)) (genNormalConSemilla 0)
@@ -130,7 +127,11 @@ evalHistograma m n expr = error "COMPLETAR EJERCICIO 10"
 -- | Mostrar las expresiones, pero evitando algunos paréntesis innecesarios.
 -- En particular queremos evitar paréntesis en sumas y productos anidados.
 mostrar :: Expr -> String
-mostrar = error "COMPLETAR EJERCICIO 11"
+mostrar = recrExpr show (\x y -> show x ++ "~" ++ show y)
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CERango && constructor x /= CESuma && constructor x /= CEConst) (recx) ++ " + "++maybeParen (constructor y /= CERango && constructor y /= CESuma && constructor y /= CEConst) (recy))
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " - "++maybeParen (constructor y /= CEConst) (recy))
+                        (\x recx y recy -> maybeParen (constructor x /= CERango && constructor x /= CEMult && constructor x /= CEConst) recx ++ " * " ++ maybeParen (constructor y /= CERango && constructor y /= CEMult && constructor y /= CEConst) recy)
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " / "++maybeParen (constructor y /= CEConst) (recy))
 
 data ConstructorExpr = CEConst | CERango | CESuma | CEResta | CEMult | CEDiv
   deriving (Show, Eq)
