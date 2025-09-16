@@ -25,10 +25,6 @@ data Expr
 
 -- 7 ---------------------------------------------------------------
 
---recr :: (a -> [a] -> b -> b) -> b -> [a] -> b
---recr f z _ [] = z
---recr f z (x:xs) = f x xs (recr f z xs)
-
  --analizando recr, vamos definir una funcion que agarre algo del tipo Expr, le aplique una funcion, y devuelva algo de otro tipo de dato.
  --Como el parametro de entrada sobre el que vamos a aplicar la funcion puede ser uno de 6 distintos tipos de Expr,  necesitamos armar casos para cada uno que las funciones
  -- que se usan para los distintos constructores no necesariamente son las mismas.
