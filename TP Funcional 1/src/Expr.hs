@@ -11,6 +11,7 @@ where
 
 import Generador
 import Histograma
+import GHC.Float (floorDouble)
 
 -- | Expresiones aritméticas con rangos
 data Expr
@@ -59,10 +60,19 @@ foldExpr fConst fRango fSuma fResta fMult fDiv c = case c of
 eval :: Expr -> G Float
 eval = foldExpr (\x g -> (x, g))
                 (\x y g -> dameUno (x,y) g)
-                (\x y g -> (fst (x g) + fst (y (snd (x g))), g))
+                (\f x y g ->)
                 (\x y g -> (fst (x g) - fst (y (snd (x g))), g))
                 (\x y g -> (fst (x g) * fst (y (snd (x g))), g))
                 (\x y g -> (fst (x g) / fst (y (snd (x g))), g))
+             where operacion f x y g = (\f x y g -> (fst (x g) f fst (y (snd (x g))), g))
+
+-- eval :: Expr -> G Float
+-- eval = foldExpr (\x g -> (x, g))
+--                 (\x y g -> dameUno (x,y) g)
+--                 (\x y g -> (fst (x g) + fst (y (snd (x g))), g))
+--                 (\x y g -> (fst (x g) - fst (y (snd (x g))), g))
+--                 (\x y g -> (fst (x g) * fst (y (snd (x g))), g))
+--                 (\x y g -> (fst (x g) / fst (y (snd (x g))), g))
 
 -- operacion :: (Float -> Float -> Float) -> G Float -> G Float -> Gen -> G Float
 -- operacion f x y g = (f ((fst (x g)) (fst (y (snd (x g))))), g)
@@ -86,12 +96,14 @@ eval = foldExpr (\x g -> (x, g))
 --armarHistograma :: Int     -> Int          -> G Float     -> G Histograma
 --                casilleros -> cant muestra -> (Float,Gen) -> 
 
+--eval :: Expr -> G Float
+
 --armarHistograma :: Int -> Int -> Gen -> (Float, Gen) -> Gen -> (Histograma, Gen)
 armarHistograma :: Int -> Int -> G Float -> G Histograma
-armarHistograma m n f g = ((histograma m (rango95 (fst (tomarMuestra(muestra f n )))) (fst ((muestra f n)))), g)
+armarHistograma m n f g = (histograma m (rango95 (fst (muestra f n g  ))) (fst (muestra f n g)), snd (muestra f n g))
 
-tomarMuestra :: Gen -> ([Float], Gen) -> ([Float], Gen)
-tomarMuestra _ f = f
+-- tomarMuestra :: Gen -> ([Float], Gen) -> ([Float], Gen)
+-- tomarMuestra _ f = f
 
 -- Gen -> (Float, Gen)
 
@@ -99,7 +111,7 @@ tomarMuestra _ f = f
 -- devuelve un histograma con @m@ casilleros y rango calculado con @rango95@ para abarcar el 95% de confianza de los valores.
 -- @n@ debe ser mayor que 0.
 evalHistograma :: Int -> Int -> Expr -> G Histograma
-evalHistograma m n expr = error "COMPLETAR EJERCICIO 10"
+evalHistograma m n expr = armarHistograma m n (eval expr)
 
 -- Podemos armar histogramas que muestren las n evaluaciones en m casilleros.
 -- >>> evalHistograma 11 10 (Suma (Rango 1 5) (Rango 100 105)) (genNormalConSemilla 0)
@@ -111,7 +123,29 @@ evalHistograma m n expr = error "COMPLETAR EJERCICIO 10"
 -- | Mostrar las expresiones, pero evitando algunos paréntesis innecesarios.
 -- En particular queremos evitar paréntesis en sumas y productos anidados.
 mostrar :: Expr -> String
-mostrar = error "COMPLETAR EJERCICIO 11"
+mostrar = recrExpr show (\x y -> show x ++ "~" ++ show y)
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CERango && constructor x /= CESuma && constructor x /= CEConst) (recx) ++ " + "++maybeParen (constructor y /= CERango && constructor y /= CESuma && constructor y /= CEConst) (recy))
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " - "++maybeParen (constructor y /= CEConst) (recy))
+                        (\x recx y recy -> maybeParen (constructor x /= CERango && constructor x /= CEMult && constructor x /= CEConst) recx ++ " * " ++ maybeParen (constructor y /= CERango && constructor y /= CEMult && constructor y /= CEConst) recy)
+                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " / "++maybeParen (constructor y /= CEConst) (recy))
+--(\x y -> x ++ " + " ++  y)  (\x y -> x ++ " * " ++  y) 
+--type FuncionRecursiva a = (a -> a -> a)
+
+-- constructor :: Expr → ConstructorExpr
+-- maybeParen :: Bool → String → String
+-- constructor e devuelve el constructor de la expresi´on e.
+-- maybeParen b s devuelve s entre par´entesis si b es True, y s sin cambios si b es False.
+
+-- recrExpr :: (Float -> a) -> (Float -> Float -> a) -> ConstructorRecu a -> ConstructorRecu a -> ConstructorRecu a-> ConstructorRecu a -> Expr -> a
+-- recrExpr fConst fRango fSuma fResta fMult fDiv c = case c of
+--                                                       Const b-> fConst b
+--                                                       Rango a b -> fRango a b
+--                                                       Suma a b -> fSuma a (rec a) b (rec b)
+--                                                       Resta a b -> fResta a (rec a) b (rec b)
+--                                                       Mult a  b -> fMult a (rec a) b (rec b)
+--                                                       Div a b -> fDiv a (rec a) b (rec b)
+--                                                   where
+--                                                       rec = recrExpr fConst fRango fSuma fResta fMult fDiv
 
 data ConstructorExpr = CEConst | CERango | CESuma | CEResta | CEMult | CEDiv
   deriving (Show, Eq)
