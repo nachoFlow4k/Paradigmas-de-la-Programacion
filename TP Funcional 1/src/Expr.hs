@@ -118,10 +118,11 @@ evalHistograma m n expr = armarHistograma m n (eval expr)
 -- 
 mostrar :: Expr -> String
 mostrar = recrExpr show (\x y -> show x ++ "~" ++ show y)
-                        (\x (recx) y (recy) ->maybeParen (constructor x /= CERango && constructor x /= CESuma && constructor x /= CEConst) (recx) ++ " + "++maybeParen (constructor y /= CERango && constructor y /= CESuma && constructor y /= CEConst) (recy))
-                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " - "++maybeParen (constructor y /= CEConst) (recy))
-                        (\x recx y recy -> maybeParen (constructor x /= CERango && constructor x /= CEMult && constructor x /= CEConst) recx ++ " * " ++ maybeParen (constructor y /= CERango && constructor y /= CEMult && constructor y /= CEConst) recy)
-                        (\x (recx) y (recy) ->maybeParen (constructor x /= CEConst) (recx) ++ " / "++maybeParen (constructor y /= CEConst) (recy))
+                        (\x rx y ry -> muestra x rx y ry (\expr -> elem (constructor expr) [CEMult, CEResta, CEDiv]) " + ")
+                        (\x rx y ry -> muestra x rx y ry (\z -> constructor z /= CEConst) " - ")
+                        (\x rx y ry -> muestra x rx y ry (\z -> elem (constructor z) [CESuma, CEResta, CEDiv]) " * ")
+                        (\x rx y ry -> muestra x rx y ry (\z -> constructor z /= CEConst) " / ")
+                      where muestra x rx y ry p s = maybeParen (p x) rx ++ s ++ maybeParen (p y) ry
 
 data ConstructorExpr = CEConst | CERango | CESuma | CEResta | CEMult | CEDiv
   deriving (Show, Eq)
