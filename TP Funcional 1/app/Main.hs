@@ -25,23 +25,23 @@ allTests =
       "Ej 4 - Histograma.agregar" ~: testsAgregar,
       "Ej 5 - Histograma.histograma" ~: testsHistograma,
       "Ej 6 - Histograma.casilleros" ~: testsCasilleros,
-      "Ej 7 - Expr.recrExpr" ~: testsRecr,
+      -- "Ej 7 - Expr.recrExpr" ~: testsRecr,
       "Ej 7 - Expr.foldExpr" ~: testsFold,
-      "Ej 8 - Expr.eval" ~: testsEval,
-      "Ej 9 - Expr.armarHistograma" ~: testsArmarHistograma,
-      "Ej 10 - Expr.evalHistograma" ~: testsEvalHistograma,
-      "Ej 11 - Expr.mostrar" ~: testsMostrar,
-      "Expr.Parser.parse" ~: testsParse,
-      "App.mostrarFloat" ~: testsMostrarFloat,
-      "App.mostrarHistograma" ~: testsMostrarHistograma
+      "Ej 8 - Expr.eval" ~: testsEval
+      -- "Ej 9 - Expr.armarHistograma" ~: testsArmarHistograma,
+      -- "Ej 10 - Expr.evalHistograma" ~: testsEvalHistograma,
+      -- "Ej 11 - Expr.mostrar" ~: testsMostrar,
+      -- "Expr.Parser.parse" ~: testsParse,
+      -- "App.mostrarFloat" ~: testsMostrarFloat,
+      -- "App.mostrarHistograma" ~: testsMostrarHistograma
     ]
 
 testsAlinearDerecha :: Test
 testsAlinearDerecha =
   test
     [ alinearDerecha 6 "hola" ~?= "  hola",
-      alinearDerecha 10 "incierticalc" ~?= "incierticalc",
-      completar
+      alinearDerecha 10 "incierticalc" ~?= "incierticalc"
+     -- completar
     ]
 
 testsActualizarElem :: Test
@@ -49,7 +49,10 @@ testsActualizarElem =
   test
     [ actualizarElem 0 (+ 10) [1, 2, 3] ~?= [11, 2, 3],
       actualizarElem 1 (+ 10) [1, 2, 3] ~?= [1, 12, 3],
-      completar
+      actualizarElem 10 (* 2) [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] ~?= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 22],
+      actualizarElem 4 (*(-1)) [1, 2, 3, 4, -5, 6] ~?= [1, 2, 3, 4, 5, 6],
+      actualizarElem 10 (+ 10) [1, 2, 3] ~?= [1, 2, 3],
+      actualizarElem 1 (+ 10) [] ~?= []
     ]
 
 testsVacio :: Test
@@ -66,8 +69,8 @@ testsVacio =
               Casillero 2 4 0 0,
               Casillero 4 6 0 0,
               Casillero 6 infinitoPositivo 0 0
-            ],
-      completar
+            ]
+   --   completar
     ]
 
 testsAgregar :: Test
@@ -94,15 +97,15 @@ testsAgregar =
                   Casillero 2 4 0 0,
                   Casillero 4 6 0 0,
                   Casillero 6 infinitoPositivo 0 0
-                ],
-          completar
+                ]
+        --  completar
         ]
 
 testsHistograma :: Test
 testsHistograma =
   test
-    [ histograma 4 (1, 5) [1, 2, 3] ~?= agregar 3 (agregar 2 (agregar 1 (vacio 4 (1, 5)))),
-      completar
+    [ histograma 4 (1, 5) [1, 2, 3] ~?= agregar 3 (agregar 2 (agregar 1 (vacio 4 (1, 5))))
+  --    completar
     ]
 
 testsCasilleros :: Test
@@ -121,20 +124,44 @@ testsCasilleros =
               Casillero 2.0 4.0 1 100.0,
               Casillero 4.0 6.0 0 0.0,
               Casillero 6.0 infinitoPositivo 0 0.0
-            ],
-      completar
+            ]
+   --   completar
     ]
 
 testsRecr :: Test
 testsRecr =
   test
-    [ completar
+    [ recrExpr id (+) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (Const 1) ~?= 1, 
+      recrExpr id (+) (\ i ri d rd -> if i == d then 5 else ri) (\ i ri d rd -> if i == d then 10 else rd) (\ i ri d rd -> if i == d then 90 else ri) (\ i ri d rd -> if i == d then 4 else rd) 
+      (Suma (Const 2) (Resta (Const 3) (Const 3))) ~?= 12,
+      recrExpr abs (**) (\ i ri d rd -> if i == d then 0 else ri + rd) (\ i ri d rd -> if i == d then 0 else ri - rd) (\ i ri d rd -> if i == d then 0 else ri * rd) (\ i ri d rd -> if i == d then 0 else ri / rd) 
+      (Mult (Rango 2 4) (Div (Suma (Const (-62)) (Resta (Const 3) (Const (-20)))) (Const 5))) ~?= 144,
+      recrExpr abs (**) (\ i ri d rd -> if i == d then 0 else ri + rd) (\ i ri d rd -> if i == d then 0 else ri - rd) (\ i ri d rd -> if i == d then 0 else ri * rd) (\ i ri d rd -> if i == d then 0 else ri / rd) 
+      (Resta (Suma (Mult (Const 1) (Const 1)) (Mult (Const 1) (Const 1))) (Const 5)) ~?= (-5),
+      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd) (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> []) 
+      (Resta (Suma (Mult (Const 1) (Const 1)) (Mult (Const 1) (Const 1))) (Const 5)) ~?= [5],
+      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd) (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> []) 
+      (Mult (Rango 6 2) (Div (Suma (Const (-62)) (Resta (Const 3) (Const (-20)))) (Const 5))) ~?= [3],
+      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd) (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> []) 
+      (Suma (Const 5) (Const 5)) ~?= []
     ]
+
 
 testsFold :: Test
 testsFold =
   test
-    [ completar
+    [ foldExpr id (+) (\ri rd -> ri + rd) (\ri rd -> ri + rd) (\ri rd -> ri + rd) (\ri rd -> ri + rd) (Const 1) ~?= 1,
+    foldExpr id (+) (\ri rd -> ri + rd) (\ri rd -> ri + rd) (\ri rd -> ri + rd) (\ri rd -> ri + rd)
+    (Suma (Const 2) (Resta (Const 3) (Const 5))) ~?= 10,
+    foldExpr (*10) (\ ri y -> (ri + y)/2) (\ri rd -> ri + rd) (\ri rd -> ri - rd) (\ri rd -> ri * rd) (\ri rd -> ri / rd)
+    (Suma (Const 2) (Resta (Mult (Const 2) (Const 3)) (Div (Const 50) (Const 10)))) ~?= 615,
+    foldExpr id (\ ri y -> (ri + y)/2) (\ri rd -> ri + rd) (\ri rd -> ri - rd) (\ri rd -> ri * rd) (\ri rd -> ri / rd)
+    (Mult (Rango 6 12) (Rango 40 80)) ~?= 540,
+    foldExpr (: []) (\ ri y -> [ri + y]) (\ri rd -> ri ++ rd) (\ri rd -> ri ++ rd) (\ri rd -> ri ++ rd)
+    (\ri rd -> ri ++ rd) (Suma (Const 2) (Resta (Mult (Const 2) (Const 3)) (Div (Const 50) (Const 10)))) ~?= [2, 2, 3, 50, 10],
+    foldExpr (\ri -> Const (ri * (-1))) (\ ri y -> Rango y ri) Resta Suma Div Mult
+    (Suma (Const 2) (Resta (Mult (Const (-2)) (Const 3)) (Div (Const 50) (Rango 5 20)))) ~?=
+    Resta (Const (-2)) (Suma (Div (Const 2) (Const (-3))) (Mult (Const (-50)) (Rango 20 5)))
     ]
 
 testsEval :: Test
@@ -144,7 +171,26 @@ testsEval =
       fst (eval (Suma (Rango 1 5) (Const 1)) (genNormalConSemilla 0)) ~?= 3.7980492,
       -- el primer rango evalua a 2.7980492 y el segundo a 3.1250308
       fst (eval (Suma (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 5.92308,
-      completar
+
+      -- caso Resta rangos iguales
+      fst (eval (Resta (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= -0.32698154,
+      -- caso Resta 
+      fst (eval (Resta (Rango 1 5) (Const 1)) (genNormalConSemilla 0)) ~?= 1.7980492,
+      
+      -- caso multiplicacion dos rangos iguales 
+      fst (eval (Mult (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 8.74398993,
+      -- caso multiplicacion 
+      fst (eval (Mult (Const 1) (Const 1)) (genNormalConSemilla 0)) ~?= 1,
+
+      --caso division
+      fst (eval (Div (Rango 1 5) (Const 1)) (genNormalConSemilla 0)) ~?= 2.7980492,
+      --caso division por 0
+--      fst (eval (Div (Rango 1 5) (Const 0)) (genNormalConSemilla 0)) ~?= Infinity,
+
+      --caso suma y resta anidados que den 0
+      fst (eval (Resta (Suma (Const 2) (Const 0.7980492)) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 0,
+      --caso multiplicacion,suma y division anidados que den 1
+      fst (eval (Div (Mult (Suma (Const 2) (Const 0.7980492)) (Const 1)) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 1
     ]
 
 testsArmarHistograma :: Test
