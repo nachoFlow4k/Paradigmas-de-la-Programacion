@@ -25,15 +25,15 @@ allTests =
       "Ej 4 - Histograma.agregar" ~: testsAgregar,
       "Ej 5 - Histograma.histograma" ~: testsHistograma,
       "Ej 6 - Histograma.casilleros" ~: testsCasilleros,
-      -- "Ej 7 - Expr.recrExpr" ~: testsRecr,
+      "Ej 7 - Expr.recrExpr" ~: testsRecr,
       "Ej 7 - Expr.foldExpr" ~: testsFold,
-      "Ej 8 - Expr.eval" ~: testsEval
-      -- "Ej 9 - Expr.armarHistograma" ~: testsArmarHistograma,
-      -- "Ej 10 - Expr.evalHistograma" ~: testsEvalHistograma,
-      -- "Ej 11 - Expr.mostrar" ~: testsMostrar,
-      -- "Expr.Parser.parse" ~: testsParse,
-      -- "App.mostrarFloat" ~: testsMostrarFloat,
-      -- "App.mostrarHistograma" ~: testsMostrarHistograma
+      "Ej 8 - Expr.eval" ~: testsEval,
+      "Ej 9 - Expr.armarHistograma" ~: testsArmarHistograma,
+      "Ej 10 - Expr.evalHistograma" ~: testsEvalHistograma,
+      "Ej 11 - Expr.mostrar" ~: testsMostrar,
+      "Expr.Parser.parse" ~: testsParse,
+      "App.mostrarFloat" ~: testsMostrarFloat,
+      "App.mostrarHistograma" ~: testsMostrarHistograma
     ]
 
 testsAlinearDerecha :: Test
@@ -131,18 +131,25 @@ testsCasilleros =
 testsRecr :: Test
 testsRecr =
   test
-    [ recrExpr id (+) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (Const 1) ~?= 1, 
-      recrExpr id (+) (\ i ri d rd -> if i == d then 5 else ri) (\ i ri d rd -> if i == d then 10 else rd) (\ i ri d rd -> if i == d then 90 else ri) (\ i ri d rd -> if i == d then 4 else rd) 
-      (Suma (Const 2) (Resta (Const 3) (Const 3))) ~?= 12,
-      recrExpr abs (**) (\ i ri d rd -> if i == d then 0 else ri + rd) (\ i ri d rd -> if i == d then 0 else ri - rd) (\ i ri d rd -> if i == d then 0 else ri * rd) (\ i ri d rd -> if i == d then 0 else ri / rd) 
+    [ recrExpr id (+) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd) (\ _ ri _ rd -> ri + rd)
+      (Const 1) ~?= 1,
+      recrExpr id (+) (\ i ri d rd -> if i == d then 5 else ri) (\ i ri d rd -> if i == d then 10 else rd)
+      (\ i ri d rd -> if i ==   d then 90 else ri) (\ i ri d rd -> if i == d then 4 else rd)
+      (Suma (Const 2) (Resta (Const 3) (Const 3))) ~?= 2,
+      recrExpr abs (**) (\ i ri d rd -> if i == d then 0 else ri + rd) (\ i ri d rd -> if i == d then 0 else ri - rd)
+      (\ i ri d rd -> if i == d then 0 else ri * rd) (\ i ri d rd -> if i == d then 0 else ri / rd)
       (Mult (Rango 2 4) (Div (Suma (Const (-62)) (Resta (Const 3) (Const (-20)))) (Const 5))) ~?= 144,
-      recrExpr abs (**) (\ i ri d rd -> if i == d then 0 else ri + rd) (\ i ri d rd -> if i == d then 0 else ri - rd) (\ i ri d rd -> if i == d then 0 else ri * rd) (\ i ri d rd -> if i == d then 0 else ri / rd) 
+      recrExpr abs (**) (\ i ri d rd -> if i == d then 0 else ri + rd) (\ i ri d rd -> if i == d then 0 else ri - rd)
+      (\ i ri d rd -> if i == d then 0 else ri * rd) (\ i ri d rd -> if i == d then 0 else ri / rd)
       (Resta (Suma (Mult (Const 1) (Const 1)) (Mult (Const 1) (Const 1))) (Const 5)) ~?= (-5),
-      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd) (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> []) 
+      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd)
+      (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> [])
       (Resta (Suma (Mult (Const 1) (Const 1)) (Mult (Const 1) (Const 1))) (Const 5)) ~?= [5],
-      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd) (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> []) 
+      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd)
+      (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> [])
       (Mult (Rango 6 2) (Div (Suma (Const (-62)) (Resta (Const 3) (Const (-20)))) (Const 5))) ~?= [3],
-      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd) (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> []) 
+      recrExpr (: []) (\ x y -> [x / y]) (\ i ri d rd -> if i == d then [] else ri) (\ i ri d rd -> if i == d then [] else rd)
+      (\ i ri d rd -> ri ++ rd) (\ _ _ _ _ -> [])
       (Suma (Const 5) (Const 5)) ~?= []
     ]
 
@@ -176,7 +183,7 @@ testsEval =
       fst (eval (Resta (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= -0.32698154,
       -- caso Resta 
       fst (eval (Resta (Rango 1 5) (Const 1)) (genNormalConSemilla 0)) ~?= 1.7980492,
-      
+
       -- caso multiplicacion dos rangos iguales 
       fst (eval (Mult (Rango 1 5) (Rango 1 5)) (genNormalConSemilla 0)) ~?= 8.74398993,
       -- caso multiplicacion 
@@ -195,13 +202,72 @@ testsEval =
 
 testsArmarHistograma :: Test
 testsArmarHistograma =
-  test
-    [completar]
+   test
+     [
+      casilleros (fst (armarHistograma 3 1 (dameUno (1, 5)) genFijo)) ~?= 
+        [Casillero infinitoNegativo 2.0 0 0.0,
+            Casillero 2.0 2.6666667 0 0.0,
+            Casillero 2.6666667 3.3333335 1 100.0,
+            Casillero 3.3333335 4.0 0 0.0,
+            Casillero 4.0 infinitoPositivo 0 0.0],
+      casilleros (fst (armarHistograma 8 33 (dameUno (10, 34)) genFijo)) ~?= 
+        [Casillero infinitoNegativo 21.0 0 0.0,
+            Casillero 21.0 21.25 0 0.0,
+            Casillero 21.25 21.5 0 0.0,
+            Casillero 21.5 21.75 0 0.0,
+            Casillero 21.75 22.0 0 0.0,
+            Casillero 22.0 22.25 33 100.0,
+            Casillero 22.25 22.5 0 0.0,
+            Casillero 22.5 22.75 0 0.0,
+            Casillero 22.75 23.0 0 0.0,
+            Casillero 23.0 infinitoPositivo 0 0.0],
+      casilleros (fst (armarHistograma 6 13 (dameUno (6, 10)) (genNormalConSemilla 0))) ~?= 
+        [Casillero infinitoNegativo 5.7222404 0 0.0,
+            Casillero 5.7222404 6.526694 3 23.076923,
+            Casillero 6.526694 7.3311477 1 7.692308,
+            Casillero 7.3311477 8.135601 3 23.076923,
+            Casillero 8.135601 8.940055 2 15.384616,
+            Casillero 8.940055 9.744509 3 23.076923,
+            Casillero 9.744509 10.548962 1 7.692308,
+            Casillero 10.548962 infinitoPositivo 0 0.0]
+     ]
 
 testsEvalHistograma :: Test
 testsEvalHistograma =
-  test
-    [completar]
+   test
+     [casilleros (fst (evalHistograma 11 10 (Suma (Rango 1 5) (Rango 100 105)) (genNormalConSemilla 0))) ~?=
+      [Casillero infinitoNegativo 105.454315 0 0.0,
+          Casillero 105.454315 105.454315 0 0.0,
+          Casillero 105.454315 105.45432 0 0.0,
+          Casillero 105.45432 105.45432 0 0.0,
+          Casillero 105.45432 105.45432 0 0.0,
+          Casillero 105.45432 105.45433 0 0.0,
+          Casillero 105.45433 105.45433 0 0.0,
+          Casillero 105.45433 105.45434 0 0.0,
+          Casillero 105.45434 105.45434 0 0.0,
+          Casillero 105.45434 105.45434 10 100.0,
+          Casillero 105.45434 105.454346 0 0.0,
+          Casillero 105.454346 105.454346 0 0.0,
+          Casillero 105.454346 infinitoPositivo 0 0.0],
+      casilleros (fst (evalHistograma 5 62 (Suma (Rango 2 80) (Rango 23 55)) (genNormalConSemilla 1))) ~?=
+      [Casillero infinitoNegativo 95.025856 0 0.0,
+          Casillero 95.025856 95.02586 0 0.0,
+          Casillero 95.02586 95.02587 62 100.0,
+          Casillero 95.02587 95.02587 0 0.0,
+          Casillero 95.02587 95.02588 0 0.0,
+          Casillero 95.02588 95.02589 0 0.0,
+          Casillero 95.02589 infinitoPositivo 0 0.0],
+      casilleros (fst (evalHistograma 7 39 (Suma (Rango 29 80) (Rango 1 1)) genFijo)) ~?=
+      [Casillero infinitoNegativo 54.5 0 0.0,
+          Casillero 54.5 54.785713 0 0.0,
+          Casillero 54.785713 55.07143 0 0.0,
+          Casillero 55.07143 55.357143 0 0.0,
+          Casillero 55.357143 55.642857 39 100.0,
+          Casillero 55.642857 55.92857 0 0.0,
+          Casillero 55.92857 56.214287 0 0.0,
+          Casillero 56.214287 56.5 0 0.0,
+          Casillero 56.5 infinitoPositivo 0 0.0]
+     ]
 
 testsParse :: Test
 testsParse =
