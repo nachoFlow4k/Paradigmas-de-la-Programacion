@@ -33,14 +33,14 @@ type ConstructorRecu a = (Expr -> a -> Expr -> a-> a)
 
 recrExpr :: (Float -> a) -> (Float -> Float -> a) -> ConstructorRecu a -> ConstructorRecu a -> ConstructorRecu a-> ConstructorRecu a -> Expr -> a
 recrExpr fConst fRango fSuma fResta fMult fDiv c = case c of
-                                                      Const b-> fConst b
-                                                      Rango a b -> fRango a b
-                                                      Suma a b -> fSuma a (rec a) b (rec b)
-                                                      Resta a b -> fResta a (rec a) b (rec b)
-                                                      Mult a  b -> fMult a (rec a) b (rec b)
-                                                      Div a b -> fDiv a (rec a) b (rec b)
-                                                  where
-                                                      rec = recrExpr fConst fRango fSuma fResta fMult fDiv
+    Const b-> fConst b
+    Rango a b -> fRango a b
+    Suma a b -> fSuma a (rec a) b (rec b)
+    Resta a b -> fResta a (rec a) b (rec b)
+    Mult a  b -> fMult a (rec a) b (rec b)
+    Div a b -> fDiv a (rec a) b (rec b)
+  where
+    rec = recrExpr fConst fRango fSuma fResta fMult fDiv
 --Importante notar como en los constructores recursivos, accedemos a la estructura (a y b) al igual que al llamado recursivo de a y b((rec a) y (rec b)), tal cual
 -- como se ve en la recursion primitiva que implementa recr.
 
@@ -51,19 +51,18 @@ recrExpr fConst fRango fSuma fResta fMult fDiv c = case c of
 
 
 
-type ConstructorRecursivo a = (a -> a -> a)
+type ConstRec a = (a -> a -> a) -- alias para el constructor recursivo
 
-foldExpr :: (Float -> a) -> (Float -> Float -> a) -> ConstructorRecursivo a -> ConstructorRecursivo a -> ConstructorRecursivo a -> ConstructorRecursivo a -> Expr -> a
-
+foldExpr :: (Float -> a) -> (Float -> Float -> a) -> ConstRec a -> ConstRec a -> ConstRec a -> ConstRec a -> Expr -> a
 foldExpr fConst fRango fSuma fResta fMult fDiv c = case c of
-                                                      Const b-> fConst b
-                                                      Rango a b -> fRango a b
-                                                      Suma a b -> fSuma (rec a) (rec b)
-                                                      Resta a b -> fResta (rec a) (rec b)
-                                                      Mult a  b -> fMult (rec a) (rec b)
-                                                      Div a b -> fDiv (rec a) (rec b)
-                                                  where
-                                                      rec = foldExpr fConst fRango fSuma fResta fMult fDiv
+    Const b-> fConst b
+    a b -> fRango a b
+    Suma a b -> fSuma (rec a) (rec b)
+    Resta a b -> fResta (rec a) (rec b)
+    Mult a  b -> fMult (rec a) (rec b)
+    Div a b -> fDiv (rec a) (rec b)
+  where
+    rec = foldExpr fConst fRango fSuma fResta fMult fDiv
 
 --cuando hacemos el fold,  las operaciones se hacen entre datos del tipo a por lo que la FuncionRecursivo va de a en a.
 
