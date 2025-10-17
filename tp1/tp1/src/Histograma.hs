@@ -47,8 +47,6 @@ vacio n (l, u) = Histograma l (tamInt l u n) [0 | x <- [0 .. n + 1]]
 agregar :: Float -> Histograma -> Histograma
 agregar f (Histograma inicio tamaño_intervalo cs) = Histograma inicio tamaño_intervalo (actualizarLista f inicio tamaño_intervalo cs)
 
-calcularIndice :: Float -> Float -> Float -> Int -- calcula el indicie en el que caeria un elem dado el inicio del intervalo y el tamano de cada casilla
-calcularIndice elem inicio tamaño_intervalo = floor ((elem - inicio) / tamaño_intervalo) + 1
 
 
 -- actualizarLista es el mecanismo que agarra a la lista y le suma uno al indice adecuado usando actualizar elem
@@ -58,7 +56,7 @@ actualizarLista elem inicio tam lista
   | i >= length lista = actualizarElem (length lista - 1) (+ 1) lista
   | otherwise = actualizarElem i (+ 1) lista
   where
-    i = calcularIndice elem inicio tam
+    i = floor ((elem - inicio) / tam) + 1 -- calcula el indice en el que caeria un elem dado el inicio del intervalo y el tamaño de cada casilla
 
 
 
@@ -68,16 +66,6 @@ actualizarLista elem inicio tam lista
 histograma :: Int -> (Float, Float) -> [Float] -> Histograma
 histograma num (desde, hasta) xs = foldr (\x rec -> agregar x rec) (vacio num (desde, hasta)) xs
 
-
---Histograma desde tamaño (agregar desde hasta [0 | x <- [0 .. num + 1]] xs)
--- 
-
-
--- funcion que recorre la lista de floats y por cada elemento, le suma uno en la lista que devuelve
--- la lista que devuelve es representativa de la lista del casillero del histograma con el respectivo tam y primer elem.
-
-agregarElementosLista :: Float -> Float -> [Int] -> [Float] -> [Int]
-agregarElementosLista primerElem tam listaHisto listaFloat = foldl (\rec x -> actualizarLista x primerElem tam rec) listaHisto listaFloat
 
 -- | Un `Casillero` representa un casillero del histograma con sus límites, cantidad y porcentaje.
 -- Invariante: Sea @Casillero m1 m2 c p@ entonces @m1 < m2@, @c >= 0@, @0 <= p <= 100@
